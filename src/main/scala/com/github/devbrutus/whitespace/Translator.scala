@@ -10,19 +10,19 @@ object Translator {
   private def stackManipulation(tokens: TokensList): ProcessedPart = {
     val tokensTail = tokens.tail
     tokens.headOption match {
-      case None => null
       case Some(SPACE) => readNumber('PUSH, tokensTail) // Push the number onto the stack
       case Some(LF) => tokensTail.headOption match {
-        case None => null
         case Some(SPACE) => 'DUP -> tokensTail.tail // Duplicate the top item on the stack
         case Some(TAB) => 'SWAP -> tokensTail.tail // Swap the top two items on the stack
         case Some(LF) => 'DISC -> tokensTail.tail // Discard the top item on the stack
+        case _ => null
       }
       case Some(TAB) => tokensTail.headOption match {
         case Some(SPACE) => readNumber('COPY, tokensTail.tail) // Copy the nth item on the stack (given by the argument) onto the top of the stack
         case Some(LF) => readNumber('SLID, tokensTail.tail) // Slide n items off the stack, keeping the top item
         case _ => null
       }
+      case _ => null
     }
   }
 
@@ -30,10 +30,10 @@ object Translator {
     val tokensTail = tokens.tail
     tokens.headOption match {
       case Some(SPACE) => tokensTail.headOption match {
-        case None => null
         case Some(SPACE) => 'ADD -> tokensTail.tail // Addition
         case Some(TAB) => 'SUB -> tokensTail.tail // Subtraction
         case Some(LF) => 'MUL -> tokensTail.tail // Multiplication
+        case _ => null
       }
       case Some(TAB) => tokensTail.headOption match {
         case Some(SPACE) => 'IDIV -> tokensTail.tail // Integer Division
@@ -47,19 +47,20 @@ object Translator {
   private def flowControl(tokens: TokensList): ProcessedPart = {
     val tokensTail = tokens.tail
     tokens.headOption match {
-      case None => null
       case Some(SPACE) => tokensTail.headOption match {
-        case None => null
         case Some(SPACE) => readNumber('MRK, tokensTail.tail) // Mark a location in the program
         case Some(TAB) => readNumber('CALL, tokensTail.tail) // Call a subroutine
         case Some(LF) => readNumber('JMP, tokensTail.tail) // Jump unconditionally to a label
+        case _ => null
       }
       case Some(TAB) => tokensTail.headOption match {
         case Some(SPACE) => readNumber('JZ, tokensTail.tail) // Jump to a label if the top of the stack is zero
         case Some(TAB) => readNumber('JNEG, tokensTail.tail) // Jump to a label if the top of the stack is negative
         case Some(LF) => 'RET -> tokensTail.tail // End a subroutine and transfer control back to the caller
+        case _ => null
       }
       case Some(LF) => 'END -> tokensTail.tail // End the program
+      case _ => null
     }
   }
 
@@ -67,8 +68,9 @@ object Translator {
   private def heapAccess(tokens: TokensList): ProcessedPart = {
     val tokensTail = tokens.tail
     tokens.headOption match {
-      case SPACE => 'STOR -> tokensTail // Store
-      case TAB => 'RETR -> tokensTail // Retrieve
+      case Some(SPACE) => 'STOR -> tokensTail // Store
+      case Some(TAB) => 'RETR -> tokensTail // Retrieve
+      case _ => null
     }
   }
 
@@ -92,15 +94,15 @@ object Translator {
   def apply(tokens: TokensList): Stream[AnyRef] = {
     val tokensTail = tokens.tail
     val processedPart = tokens.headOption match {
-      case None => null
       case Some(SPACE) => stackManipulation(tokensTail)
       case Some(LF) => flowControl(tokensTail)
       case Some(TAB) => tokensTail.headOption match {
-        case None => null
         case Some(SPACE) => arithmetic(tokensTail.tail)
         case Some(TAB) => heapAccess(tokensTail.tail)
         case Some(LF) => io(tokensTail.tail)
+        case _ => null
       }
+      case _ => null
     }
 
     if (processedPart == null) Stream.empty
