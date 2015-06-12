@@ -92,7 +92,7 @@ object Translator {
   }
 
   def apply(tokens: TokensList): Stream[AnyRef] = {
-    val tokensTail = tokens.tail
+    lazy val tokensTail = tokens.tail
     val processedPart = tokens.headOption match {
       case Some(SPACE) => stackManipulation(tokensTail)
       case Some(LF) => flowControl(tokensTail)
@@ -110,7 +110,7 @@ object Translator {
   }
 
   private def readNumber(symbol: Symbol, tokens: TokensList): ((Symbol, Long), TokensList) = {
-    val (numberData, tail) = tokens.span(_ == LF)
+    val (numberData, tail) = tokens.span(_ != LF)
     val number = numberData.tail.foldLeft(0L)((number, ch) => {
       val result = number * 2
       if (ch == TAB) result + 1
@@ -122,6 +122,6 @@ object Translator {
       case _ => number
     }
 
-    ((symbol, result), tail)
+    ((symbol, result), tail.tail)
   }
 }

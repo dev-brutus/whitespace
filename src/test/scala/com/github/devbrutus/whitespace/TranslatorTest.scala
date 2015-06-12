@@ -24,8 +24,8 @@ object TranslatorTest extends App {
   )
 
   val listing = Translator(PROGRAM).map {
-    case s: Symbol => s"$s;"
-    case (s: Symbol, n: Long) => s"${s.toString().padTo(4, " ")} $n;"
+    case s: Symbol => s.toString()
+    case (s: Symbol, n: Long) => s"${s.toString().padTo(5, " ").mkString} $n;"
   }
 
   println(listing.mkString("\n"))

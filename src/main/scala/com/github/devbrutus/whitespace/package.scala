@@ -8,9 +8,12 @@ import java.io.InputStream
 package object whitespace {
   type TokensList = List[Char]
 
-  val SPACE = ' '
-  val TAB = '\t'
-  val LF = '\n'
+  //  val SPACE = ' '
+  //  val TAB = '\t'
+  //  val LF = '\n'
+  val SPACE = 's'
+  val TAB = 't'
+  val LF = 'l'
 
   val TOKENS = Set(SPACE, TAB, LF)
 
