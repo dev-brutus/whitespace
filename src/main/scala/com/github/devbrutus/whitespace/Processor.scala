@@ -5,8 +5,13 @@ import java.io.InputStream
 /**
  *
  */
-class Processor(is: InputStream, val stateMachine: StateMachine) {
-  def this(is: InputStream) = this(is, new StateMachine())
+class Processor(is: InputStream) {
 
-  private val tokenIterator: TokensList = is.toTokensList
+  private val stateMachine = new StateMachine(Translator(is.toTokensList).toIndexedSeq)
+
+  def apply(): Unit = {
+    while (stateMachine.isRun) {
+      stateMachine.doStep()
+    }
+  }
 }

@@ -3,7 +3,7 @@ package com.github.devbrutus.whitespace
 /**
  *
  */
-object TranslatorTest extends App {
+object TranslatorTest {
   val PROGRAM = List(
     SPACE, SPACE, SPACE, TAB, LF, // 	Put a 1 on the stack
     LF, SPACE, SPACE, SPACE, TAB, SPACE, SPACE, SPACE, SPACE, TAB, TAB, LF, // 	Set a Label at this point
@@ -23,11 +23,13 @@ object TranslatorTest extends App {
     LF, LF, LF // 	Finish
   )
 
-  val listing = Translator(PROGRAM).map {
+  val TRANSLATED_PROGRAM = Translator(PROGRAM).toIndexedSeq
+
+  val listing = TRANSLATED_PROGRAM.map {
     case s: Symbol => s.toString()
     case (s: Symbol, n: Long) => s"${s.toString().padTo(5, " ").mkString} $n;"
   }
 
-  println(listing.mkString("\n"))
+  // println(listing.mkString("\n"))
 
 }
