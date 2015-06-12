@@ -23,38 +23,56 @@ class StateMachine(program: IndexedSeq[AnyRef]) {
     if (isRun_) {
       instruction = instruction + 1
       program(instruction) match {
-        case ('PUSH, value: Long) => push(value)
-        case 'DUP => duplicate
-        case 'SWAP => swap
-        case 'DISC => discard
-        case ('COPY, value: Long) => copy(value.toInt)
-        case ('SLID, value: Long) => slide(value.toInt)
+        case s: Symbol =>
+          s match {
+            case 'DUP => duplicate
+            case 'SWAP => swap
+            case 'DISC => discard
+            case 'ADD => add
+            case 'SUB => sub
+            case 'MUL => mul
+            case 'IDIV => idiv
+            case 'MOD => mod
+            case 'RET => `return`()
+            case 'END => end()
 
-        case 'ADD => add
-        case 'SUB => sub
-        case 'MUL => mul
-        case 'IDIV => idiv
-        case 'MOD => mod
+            case 'STOR => store()
+            case 'RETR => retrieve()
 
-        case ('MRK, _) => null
-        case ('CALL, label: Long) => call(label)
-        case ('JMP, label: Long) => jump(label)
-        case ('JZ, label: Long) => jumpIfZero(label)
-        case ('JNEG, label: Long) => jumpIfNegative(label)
-        case 'RET => `return`()
-        case 'END => end()
+            case 'WRCH => writeChar()
+            case 'WRNM => writeNumber()
+            case 'RDCH => readChar()
+            case 'RDNM => readNumber()
+          }
+        case (s: Symbol, value: Long) =>
+          s match {
+            case 'PUSH => push(value)
 
-        case 'STOR => store()
-        case 'RETR => retrieve()
+            case 'COPY => copy(value.toInt)
+            case 'SLID => slide(value.toInt)
 
-        case 'WRCH => writeChar()
-        case 'WRNM => writeNumber()
-        case 'RDCH => readChar()
-        case 'RDNM => readNumber()
+            case 'MRK => null
+            case 'CALL => call(value)
+            case 'JMP => jump(value)
+            case 'JZ => jumpIfZero(value)
+            case 'JNEG => jumpIfNegative(value)
+          }
       }
     }
 
+    printState()
     isRun_
+  }
+
+  def printState(): Unit = {
+    println(f"=== $instruction%05d ===")
+    println(program(instruction))
+    println("Stack:")
+    stack.foreach(i => println(s"    $i"))
+    println("Heap:")
+    heap.foreach(i => println(s"    $i"))
+    println(s"Run $isRun")
+    println()
   }
 
   def isRun = isRun_
